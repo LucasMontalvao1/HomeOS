@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HomeOS.API/HomeOS.API.csproj" />
+    <Project Path="src/HomeOS.Shared/HomeOS.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HomeOS.UnitTests/HomeOS.UnitTests.csproj" />
+  </Folder>
+</Solution>
