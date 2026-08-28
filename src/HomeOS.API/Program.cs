@@ -9,6 +9,9 @@ using HomeOS.API.Modules.Identity.Infrastructure;
 using HomeOS.API.Modules.Products.Application;
 using HomeOS.API.Modules.Products.Endpoints;
 using HomeOS.API.Modules.Products.Infrastructure;
+using HomeOS.API.Modules.Shopping.Application;
+using HomeOS.API.Modules.Shopping.Endpoints;
+using HomeOS.API.Modules.Shopping.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -78,6 +81,10 @@ builder.Services.AddScoped<HouseholdService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ProductService>();
 
+// ─── Module Services (Shopping) ──────────────────────────────────────────────────
+builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
+builder.Services.AddScoped<ShoppingListService>();
+
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
@@ -100,6 +107,7 @@ app.MapHealthChecks("/health");
 app.MapIdentityEndpoints();
 app.MapHouseholdEndpoints();
 app.MapProductEndpoints();
+app.MapShoppingListEndpoints();
 
 app.MapGet("/", () => "HomeOS API is running.").AllowAnonymous();
 
