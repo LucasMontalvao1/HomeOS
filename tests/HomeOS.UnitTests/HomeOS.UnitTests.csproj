@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HomeOS.API\HomeOS.API.csproj" />
+  </ItemGroup>
+
 </Project>

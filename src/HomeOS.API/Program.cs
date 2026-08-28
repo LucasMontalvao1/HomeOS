@@ -1,35 +1,79 @@
+using HomeOS.API.Infrastructure.Database;
 using HomeOS.API.Middlewares;
+using HomeOS.API.Modules.Household.Application;
+using HomeOS.API.Modules.Household.Endpoints;
+using HomeOS.API.Modules.Household.Infrastructure;
+using HomeOS.API.Modules.Identity.Application;
+using HomeOS.API.Modules.Identity.Endpoints;
+using HomeOS.API.Modules.Identity.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Serilog;
 using System.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// ─── Serilog ───────────────────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 builder.Host.UseSerilog();
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// ─── Database Migrations ───────────────────────────────────────────────────
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ConnectionString 'DefaultConnection' não configurada.");
 
-// Global Exception Handler
+builder.Services.AddDatabaseMigrations(connectionString);
+
+// ─── Dapper / Npgsql ────────────────────────────────────────────────────────
+builder.Services.AddTransient<IDbConnection>(_ => new NpgsqlConnection(connectionString));
+
+// ─── JWT Authentication ─────────────────────────────────────────────────────
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException("Jwt:Secret não configurado.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// ─── Global Error Handler ────────────────────────────────────────────────────
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Database Connection
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddTransient<IDbConnection>((sp) => new NpgsqlConnection(connectionString));
+// ─── Swagger ─────────────────────────────────────────────────────────────────
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Health Checks
+// ─── Health Checks ────────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionString ?? string.Empty, name: "postgres");
+    .AddNpgSql(connectionString, name: "postgres");
 
+// ─── Module Services (Identity) ───────────────────────────────────────────────
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<AuthService>();
+
+// ─── Module Services (Household) ─────────────────────────────────────────────
+builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
+builder.Services.AddScoped<HouseholdService>();
+
+// ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -39,10 +83,16 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Health check endpoint
+// ─── Health Check ─────────────────────────────────────────────────────────────
 app.MapHealthChecks("/health");
 
-app.MapGet("/", () => "HomeOS API is running.");
+// ─── Module Endpoints ─────────────────────────────────────────────────────────
+app.MapIdentityEndpoints();
+app.MapHouseholdEndpoints();
+
+app.MapGet("/", () => "HomeOS API is running.").AllowAnonymous();
 
 app.Run();

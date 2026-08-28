@@ -1,0 +1,9 @@
+CREATE TABLE HouseholdMembers (
+    HouseholdId UUID NOT NULL,
+    UserId UUID NOT NULL,
+    Role VARCHAR(50) NOT NULL,
+    JoinedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (HouseholdId, UserId),
+    CONSTRAINT FK_HouseholdMembers_Household FOREIGN KEY (HouseholdId) REFERENCES Households(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_HouseholdMembers_User FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+);

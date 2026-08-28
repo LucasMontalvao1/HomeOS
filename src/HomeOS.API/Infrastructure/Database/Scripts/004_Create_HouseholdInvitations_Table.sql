@@ -1,0 +1,9 @@
+CREATE TABLE HouseholdInvitations (
+    Id UUID PRIMARY KEY,
+    HouseholdId UUID NOT NULL,
+    Code VARCHAR(50) NOT NULL UNIQUE,
+    ExpiresAt TIMESTAMP NOT NULL,
+    Status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT FK_HouseholdInvitations_Household FOREIGN KEY (HouseholdId) REFERENCES Households(Id) ON DELETE CASCADE
+);
