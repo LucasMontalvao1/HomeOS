@@ -18,9 +18,10 @@ public static class IdentityEndpoints
                 return Results.BadRequest(new { error = "Nome é obrigatório." });
             if (string.IsNullOrWhiteSpace(request.Email))
                 return Results.BadRequest(new { error = "Email é obrigatório." });
-            if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
-                return Results.BadRequest(new { error = "Senha deve ter pelo menos 6 caracteres." });
-
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                return Results.BadRequest(new { error = "Senha é obrigatória." });
+            } 
             try
             {
                 var response = await authService.RegisterAsync(request);
