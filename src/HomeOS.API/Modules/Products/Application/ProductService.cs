@@ -29,7 +29,8 @@ public class ProductService
             request.Brand,
             request.Category,
             request.Unit,
-            request.Barcode);
+            request.Barcode,
+            request.ImageUrl);
 
         await _productRepository.CreateAsync(product);
         return ToResponse(product);
@@ -67,7 +68,7 @@ public class ProductService
                 throw new InvalidOperationException($"Já existe um produto com o código de barras '{request.Barcode}' nesta casa.");
         }
 
-        product.Update(request.Name, request.Brand, request.Category, request.Unit, request.Barcode);
+        product.Update(request.Name, request.Brand, request.Category, request.Unit, request.Barcode, request.ImageUrl);
         await _productRepository.UpdateAsync(product);
         return ToResponse(product);
     }
@@ -82,5 +83,5 @@ public class ProductService
     }
 
     private static ProductResponse ToResponse(Product p) =>
-        new(p.Id, p.HouseholdId, p.Name, p.Brand, p.Category, p.Unit, p.Barcode, p.CreatedAt, p.UpdatedAt);
+        new(p.Id, p.HouseholdId, p.Name, p.Brand, p.Category, p.Unit, p.Barcode, p.ImageUrl, p.CreatedAt, p.UpdatedAt);
 }

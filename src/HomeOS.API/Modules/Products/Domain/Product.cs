@@ -9,6 +9,7 @@ public class Product
     public string? Category { get; private set; }
     public string? Unit { get; private set; }
     public string? Barcode { get; private set; }
+    public string? ImageUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -23,7 +24,8 @@ public class Product
         string? brand = null,
         string? category = null,
         string? unit = null,
-        string? barcode = null)
+        string? barcode = null,
+        string? imageUrl = null)
     {
         if (householdId == Guid.Empty)
             throw new ArgumentException("HouseholdId é obrigatório.", nameof(householdId));
@@ -40,12 +42,13 @@ public class Product
             Category = category?.Trim(),
             Unit = unit?.Trim(),
             Barcode = barcode?.Trim(),
+            ImageUrl = imageUrl?.Trim(),
             CreatedAt = now,
             UpdatedAt = now
         };
     }
 
-    public void Update(string name, string? brand, string? category, string? unit, string? barcode)
+    public void Update(string name, string? brand, string? category, string? unit, string? barcode, string? imageUrl)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Nome do produto é obrigatório.", nameof(name));
@@ -55,6 +58,7 @@ public class Product
         Category = category?.Trim();
         Unit = unit?.Trim();
         Barcode = barcode?.Trim();
+        ImageUrl = imageUrl?.Trim();
         UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -5,14 +5,16 @@ public record CreateProductRequest(
     string? Brand,
     string? Category,
     string? Unit,
-    string? Barcode);
+    string? Barcode,
+    string? ImageUrl);
 
 public record UpdateProductRequest(
     string Name,
     string? Brand,
     string? Category,
     string? Unit,
-    string? Barcode);
+    string? Barcode,
+    string? ImageUrl);
 
 public record ProductResponse(
     Guid Id,
@@ -22,5 +24,6 @@ public record ProductResponse(
     string? Category,
     string? Unit,
     string? Barcode,
+    string? ImageUrl,
     DateTime CreatedAt,
     DateTime UpdatedAt);

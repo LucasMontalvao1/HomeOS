@@ -1,0 +1,2 @@
+ALTER TABLE Products
+ADD COLUMN ImageUrl VARCHAR(2048);

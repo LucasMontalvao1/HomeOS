@@ -167,6 +167,7 @@ public class ShoppingListRepository : IShoppingListRepository
     private static ShoppingList MapShoppingList(dynamic row)
     {
         var l = (ShoppingList)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ShoppingList));
+        typeof(ShoppingList).GetField("_items", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.SetValue(l, new List<ShoppingListItem>());
         typeof(ShoppingList).GetProperty(nameof(ShoppingList.Id))!.SetValue(l, (Guid)row.id);
         typeof(ShoppingList).GetProperty(nameof(ShoppingList.HouseholdId))!.SetValue(l, (Guid)row.householdid);
         typeof(ShoppingList).GetProperty(nameof(ShoppingList.Name))!.SetValue(l, (string)row.name);

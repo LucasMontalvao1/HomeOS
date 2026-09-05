@@ -9,8 +9,8 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  userId: string;
-  userName: string;
+  name: string;
+  email: string;
 }
 
 @Injectable({
@@ -50,7 +50,7 @@ export class AuthService {
 
   private saveAuthData(data: LoginResponse): void {
     localStorage.setItem(this.TOKEN_KEY, data.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify({ userId: data.userId, userName: data.userName }));
+    localStorage.setItem(this.USER_KEY, JSON.stringify({ name: data.name, email: data.email }));
   }
 
   private loadUserFromStorage(): LoginResponse | null {

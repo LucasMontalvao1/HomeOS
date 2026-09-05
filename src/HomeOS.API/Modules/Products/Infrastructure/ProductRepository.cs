@@ -27,7 +27,7 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> FindByIdAsync(Guid id, Guid householdId)
     {
         const string sql = """
-            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, CreatedAt, UpdatedAt
+            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, ImageUrl, CreatedAt, UpdatedAt
             FROM Products
             WHERE Id = @Id AND HouseholdId = @HouseholdId
             """;
@@ -38,7 +38,7 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> FindByBarcodeAsync(string barcode, Guid householdId)
     {
         const string sql = """
-            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, CreatedAt, UpdatedAt
+            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, ImageUrl, CreatedAt, UpdatedAt
             FROM Products
             WHERE Barcode = @Barcode AND HouseholdId = @HouseholdId
             """;
@@ -49,7 +49,7 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> SearchAsync(string? query, Guid householdId)
     {
         const string sql = """
-            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, CreatedAt, UpdatedAt
+            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, ImageUrl, CreatedAt, UpdatedAt
             FROM Products
             WHERE HouseholdId = @HouseholdId
               AND (@Query IS NULL OR Name ILIKE @Pattern OR Brand ILIKE @Pattern OR Barcode = @Query)
@@ -68,7 +68,7 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync(Guid householdId)
     {
         const string sql = """
-            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, CreatedAt, UpdatedAt
+            SELECT Id, HouseholdId, Name, Brand, Category, Unit, Barcode, ImageUrl, CreatedAt, UpdatedAt
             FROM Products
             WHERE HouseholdId = @HouseholdId
             ORDER BY Name ASC
@@ -80,8 +80,8 @@ public class ProductRepository : IProductRepository
     public async Task CreateAsync(Product product)
     {
         const string sql = """
-            INSERT INTO Products (Id, HouseholdId, Name, Brand, Category, Unit, Barcode, CreatedAt, UpdatedAt)
-            VALUES (@Id, @HouseholdId, @Name, @Brand, @Category, @Unit, @Barcode, @CreatedAt, @UpdatedAt)
+            INSERT INTO Products (Id, HouseholdId, Name, Brand, Category, Unit, Barcode, ImageUrl, CreatedAt, UpdatedAt)
+            VALUES (@Id, @HouseholdId, @Name, @Brand, @Category, @Unit, @Barcode, @ImageUrl, @CreatedAt, @UpdatedAt)
             """;
         await _db.ExecuteAsync(sql, new
         {
@@ -92,6 +92,7 @@ public class ProductRepository : IProductRepository
             product.Category,
             product.Unit,
             product.Barcode,
+            product.ImageUrl,
             product.CreatedAt,
             product.UpdatedAt
         });
@@ -106,6 +107,7 @@ public class ProductRepository : IProductRepository
                 Category = @Category,
                 Unit = @Unit,
                 Barcode = @Barcode,
+                ImageUrl = @ImageUrl,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id AND HouseholdId = @HouseholdId
             """;
@@ -118,6 +120,7 @@ public class ProductRepository : IProductRepository
             product.Category,
             product.Unit,
             product.Barcode,
+            product.ImageUrl,
             product.UpdatedAt
         });
     }
@@ -138,6 +141,7 @@ public class ProductRepository : IProductRepository
         typeof(Product).GetProperty(nameof(Product.Category))!.SetValue(p, (string?)row.category);
         typeof(Product).GetProperty(nameof(Product.Unit))!.SetValue(p, (string?)row.unit);
         typeof(Product).GetProperty(nameof(Product.Barcode))!.SetValue(p, (string?)row.barcode);
+        typeof(Product).GetProperty(nameof(Product.ImageUrl))!.SetValue(p, (string?)row.imageurl);
         typeof(Product).GetProperty(nameof(Product.CreatedAt))!.SetValue(p, (DateTime)row.createdat);
         typeof(Product).GetProperty(nameof(Product.UpdatedAt))!.SetValue(p, (DateTime)row.updatedat);
         return p;

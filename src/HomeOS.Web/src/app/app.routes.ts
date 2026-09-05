@@ -18,6 +18,16 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'products',
+    loadComponent: () => import('./features/products/products.component').then(c => c.ProductsComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'shopping-lists',
+    loadComponent: () => import('./features/shopping-lists/shopping-lists.component').then(c => c.ShoppingListsComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
