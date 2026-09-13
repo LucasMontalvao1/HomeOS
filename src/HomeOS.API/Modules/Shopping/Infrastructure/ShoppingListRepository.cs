@@ -40,7 +40,7 @@ public class ShoppingListRepository : IShoppingListRepository
         var list = MapShoppingList(row);
 
         const string sqlItems = """
-            SELECT Id, ShoppingListId, ProductId, Quantity, Unit, Checked, CreatedAt, UpdatedAt
+            SELECT Id, ShoppingListId, ProductId, Quantity, Unit, Price, Checked, CreatedAt, UpdatedAt
             FROM ShoppingListItems
             WHERE ShoppingListId = @ListId
             """;
@@ -110,7 +110,7 @@ public class ShoppingListRepository : IShoppingListRepository
     public async Task<ShoppingListItem?> FindItemByIdAsync(Guid itemId, Guid listId)
     {
         const string sql = """
-            SELECT Id, ShoppingListId, ProductId, Quantity, Unit, Checked, CreatedAt, UpdatedAt
+            SELECT Id, ShoppingListId, ProductId, Quantity, Unit, Price, Checked, CreatedAt, UpdatedAt
             FROM ShoppingListItems
             WHERE Id = @Id AND ShoppingListId = @ListId
             """;
@@ -121,8 +121,8 @@ public class ShoppingListRepository : IShoppingListRepository
     public async Task CreateItemAsync(ShoppingListItem item)
     {
         const string sql = """
-            INSERT INTO ShoppingListItems (Id, ShoppingListId, ProductId, Quantity, Unit, Checked, CreatedAt, UpdatedAt)
-            VALUES (@Id, @ShoppingListId, @ProductId, @Quantity, @Unit, @Checked, @CreatedAt, @UpdatedAt)
+            INSERT INTO ShoppingListItems (Id, ShoppingListId, ProductId, Quantity, Unit, Price, Checked, CreatedAt, UpdatedAt)
+            VALUES (@Id, @ShoppingListId, @ProductId, @Quantity, @Unit, @Price, @Checked, @CreatedAt, @UpdatedAt)
             """;
         await _db.ExecuteAsync(sql, new
         {
@@ -131,6 +131,7 @@ public class ShoppingListRepository : IShoppingListRepository
             item.ProductId,
             item.Quantity,
             item.Unit,
+            item.Price,
             item.Checked,
             item.CreatedAt,
             item.UpdatedAt
@@ -143,6 +144,7 @@ public class ShoppingListRepository : IShoppingListRepository
             UPDATE ShoppingListItems
             SET Quantity = @Quantity,
                 Unit = @Unit,
+                Price = @Price,
                 Checked = @Checked,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id AND ShoppingListId = @ShoppingListId
@@ -153,6 +155,7 @@ public class ShoppingListRepository : IShoppingListRepository
             item.ShoppingListId,
             item.Quantity,
             item.Unit,
+            item.Price,
             item.Checked,
             item.UpdatedAt
         });
@@ -185,6 +188,7 @@ public class ShoppingListRepository : IShoppingListRepository
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.ProductId))!.SetValue(i, (Guid)row.productid);
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.Quantity))!.SetValue(i, (decimal)row.quantity);
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.Unit))!.SetValue(i, (string?)row.unit);
+        typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.Price))!.SetValue(i, (decimal?)row.price);
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.Checked))!.SetValue(i, (bool)row.@checked);
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.CreatedAt))!.SetValue(i, (DateTime)row.createdat);
         typeof(ShoppingListItem).GetProperty(nameof(ShoppingListItem.UpdatedAt))!.SetValue(i, (DateTime)row.updatedat);

@@ -119,7 +119,7 @@ public class ShoppingListService
         if (product is null)
             throw new KeyNotFoundException("Produto não encontrado.");
 
-        var item = list.AddItem(request.ProductId, request.Quantity, request.Unit);
+        var item = list.AddItem(request.ProductId, request.Quantity, request.Unit, request.Price);
         
         await _shoppingListRepository.UpdateAsync(list); // Updates list timestamp
         await _shoppingListRepository.CreateItemAsync(item);
@@ -132,6 +132,7 @@ public class ShoppingListService
             product.Barcode,
             item.Quantity,
             item.Unit,
+            item.Price,
             item.Checked,
             item.CreatedAt,
             item.UpdatedAt);
@@ -181,7 +182,7 @@ public class ShoppingListService
         return await MapItemToResponseAsync(item, householdId);
     }
     
-    public async Task<ShoppingListItemResponse> UpdateItemQuantityAsync(Guid listId, Guid itemId, UpdateItemQuantityRequest request, Guid householdId)
+    public async Task<ShoppingListItemResponse> UpdateItemDetailsAsync(Guid listId, Guid itemId, UpdateItemDetailsRequest request, Guid householdId)
     {
         var list = await _shoppingListRepository.FindByIdAsync(listId, householdId);
         if (list is null)
@@ -191,7 +192,7 @@ public class ShoppingListService
         if (item is null)
             throw new KeyNotFoundException("Item não encontrado.");
 
-        item.UpdateQuantity(request.Quantity);
+        item.UpdateDetails(request.Quantity, request.Price);
         await _shoppingListRepository.UpdateItemAsync(item);
 
         return await MapItemToResponseAsync(item, householdId);
@@ -213,6 +214,7 @@ public class ShoppingListService
                     product.Barcode,
                     item.Quantity,
                     item.Unit,
+                    item.Price,
                     item.Checked,
                     item.CreatedAt,
                     item.UpdatedAt));
@@ -242,6 +244,7 @@ public class ShoppingListService
             product.Barcode,
             item.Quantity,
             item.Unit,
+            item.Price,
             item.Checked,
             item.CreatedAt,
             item.UpdatedAt);

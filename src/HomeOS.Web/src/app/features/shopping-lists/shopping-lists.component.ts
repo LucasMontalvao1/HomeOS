@@ -158,6 +158,11 @@ const STATUS_COLOR: Record<string, string> = {
                           <input type="text" [(ngModel)]="newItemUnit" placeholder="kg, L, un..."
                             class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/30 outline-none" />
                         </div>
+                        <div class="col-span-2">
+                          <label class="block text-sm font-medium text-slate-700 mb-1">Preço (Opcional)</label>
+                          <input type="number" min="0" step="0.01" [(ngModel)]="newItemPrice" placeholder="R$ 0,00"
+                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/30 outline-none" />
+                        </div>
                       </div>
 
                       <button (click)="addItem()" [disabled]="!newItemProductId || isAddingItem" class="w-full btn-primary py-2 text-sm">
@@ -218,6 +223,14 @@ const STATUS_COLOR: Record<string, string> = {
                       </div>
 
                       <div class="flex items-center gap-3">
+                        @if (selectedList.status === 'InProgress') {
+                          <input type="number" [ngModel]="item.price" (change)="updateItemPrice(item, $event)" placeholder="R$ 0,00" step="0.01" min="0" class="w-24 bg-white border border-slate-200 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-emerald-500/30 outline-none" />
+                        } @else if (item.price) {
+                          <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                            R$ {{ item.price | number:'1.2-2' }}
+                          </span>
+                        }
+                        
                         <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-md">
                           {{ item.quantity }} {{ item.unit || 'un' }}
                         </span>
@@ -280,6 +293,7 @@ export class ShoppingListsComponent {
   newItemProductId = '';
   newItemQuantity = 1;
   newItemUnit = '';
+  newItemPrice: number | null = null;
   isAddingItem = false;
 
   ngOnInit() {
@@ -412,13 +426,15 @@ export class ShoppingListsComponent {
       this.newItemProductId,
       this.newItemQuantity,
       this.activeHouseholdId,
-      this.newItemUnit || undefined
+      this.newItemUnit || undefined,
+      this.newItemPrice || undefined
     ).subscribe({
       next: () => {
         this.isAddingItem = false;
         this.newItemProductId = '';
         this.newItemQuantity = 1;
         this.newItemUnit = '';
+        this.newItemPrice = null;
         this.selectListById(this.selectedList!.id);
       },
       error: (err) => {
@@ -443,6 +459,26 @@ export class ShoppingListsComponent {
 
     call.subscribe({
       next: () => this.selectListById(this.selectedList!.id)
+    });
+  }
+
+  updateItemPrice(item: ShoppingListItem, event: Event) {
+    if (!this.selectedList || !this.activeHouseholdId) return;
+    const input = event.target as HTMLInputElement;
+    const newPrice = input.value ? parseFloat(input.value) : undefined;
+    
+    this.shoppingListService.updateItemDetails(
+      this.selectedList.id,
+      item.id,
+      item.quantity,
+      this.activeHouseholdId,
+      newPrice
+    ).subscribe({
+      next: () => this.selectListById(this.selectedList!.id),
+      error: () => {
+        alert('Erro ao atualizar preço.');
+        this.selectListById(this.selectedList!.id); // reload
+      }
     });
   }
 }

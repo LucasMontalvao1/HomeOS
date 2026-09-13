@@ -6,9 +6,9 @@ public record CreateShoppingListRequest(string Name);
 
 public record UpdateShoppingListRequest(string Name);
 
-public record AddItemRequest(Guid ProductId, decimal Quantity, string? Unit);
+public record AddItemRequest(Guid ProductId, decimal Quantity, string? Unit, decimal? Price = null);
 
-public record UpdateItemQuantityRequest(decimal Quantity);
+public record UpdateItemDetailsRequest(decimal Quantity, decimal? Price = null);
 
 public record ShoppingListItemResponse(
     Guid Id,
@@ -18,6 +18,7 @@ public record ShoppingListItemResponse(
     string? ProductBarcode,
     decimal Quantity,
     string? Unit,
+    decimal? Price,
     bool Checked,
     DateTime CreatedAt,
     DateTime UpdatedAt);

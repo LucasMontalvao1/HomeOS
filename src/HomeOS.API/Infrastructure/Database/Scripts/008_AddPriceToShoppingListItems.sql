@@ -1,0 +1,2 @@
+ALTER TABLE ShoppingListItems
+ADD COLUMN Price DECIMAL(10, 2);

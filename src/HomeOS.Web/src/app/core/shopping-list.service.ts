@@ -12,6 +12,7 @@ export interface ShoppingListItem {
   productBarcode?: string;
   quantity: number;
   unit?: string;
+  price?: number;
   checked: boolean;
   createdAt: string;
   updatedAt: string;
@@ -69,8 +70,8 @@ export class ShoppingListService {
     return this.http.post<ShoppingList>(`${this.baseUrl}/${id}/complete?householdId=${householdId}`, {});
   }
 
-  addItem(listId: string, productId: string, quantity: number, householdId: string, unit?: string): Observable<ShoppingListItem> {
-    return this.http.post<ShoppingListItem>(`${this.baseUrl}/${listId}/items?householdId=${householdId}`, { productId, quantity, unit });
+  addItem(listId: string, productId: string, quantity: number, householdId: string, unit?: string, price?: number): Observable<ShoppingListItem> {
+    return this.http.post<ShoppingListItem>(`${this.baseUrl}/${listId}/items?householdId=${householdId}`, { productId, quantity, unit, price });
   }
 
   removeItem(listId: string, itemId: string, householdId: string): Observable<void> {
@@ -83,5 +84,9 @@ export class ShoppingListService {
 
   uncheckItem(listId: string, itemId: string, householdId: string): Observable<ShoppingListItem> {
     return this.http.put<ShoppingListItem>(`${this.baseUrl}/${listId}/items/${itemId}/uncheck?householdId=${householdId}`, {});
+  }
+
+  updateItemDetails(listId: string, itemId: string, quantity: number, householdId: string, price?: number): Observable<ShoppingListItem> {
+    return this.http.put<ShoppingListItem>(`${this.baseUrl}/${listId}/items/${itemId}/details?householdId=${householdId}`, { quantity, price });
   }
 }

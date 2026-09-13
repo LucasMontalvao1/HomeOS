@@ -238,10 +238,10 @@ public static class ShoppingListEndpoints
             }
         }).WithName("UncheckShoppingListItem");
         
-        group.MapPut("/{listId:guid}/items/{itemId:guid}/quantity", async (
+        group.MapPut("/{listId:guid}/items/{itemId:guid}/details", async (
             Guid listId,
             Guid itemId,
-            [FromBody] UpdateItemQuantityRequest request,
+            [FromBody] UpdateItemDetailsRequest request,
             [FromQuery] Guid householdId,
             ShoppingListService shoppingListService) =>
         {
@@ -249,7 +249,7 @@ public static class ShoppingListEndpoints
 
             try
             {
-                var item = await shoppingListService.UpdateItemQuantityAsync(listId, itemId, request, householdId);
+                var item = await shoppingListService.UpdateItemDetailsAsync(listId, itemId, request, householdId);
                 return Results.Ok(item);
             }
             catch (KeyNotFoundException)
@@ -260,7 +260,7 @@ public static class ShoppingListEndpoints
             {
                 return Results.BadRequest(new { error = ex.Message });
             }
-        }).WithName("UpdateShoppingListItemQuantity");
+        }).WithName("UpdateShoppingListItemDetails");
     }
 
     private static bool IsValidHousehold(Guid id) => id != Guid.Empty;

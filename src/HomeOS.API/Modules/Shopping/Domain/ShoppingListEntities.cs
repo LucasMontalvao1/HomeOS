@@ -80,7 +80,7 @@ public class ShoppingList
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public ShoppingListItem AddItem(Guid productId, decimal quantity, string? unit)
+    public ShoppingListItem AddItem(Guid productId, decimal quantity, string? unit, decimal? price = null)
     {
         if (Status == ShoppingListStatus.Completed || Status == ShoppingListStatus.Cancelled)
             throw new InvalidOperationException("Não é possível adicionar itens a uma lista finalizada.");
@@ -94,7 +94,7 @@ public class ShoppingList
             throw new InvalidOperationException("Produto já existe na lista.");
         }
 
-        var item = ShoppingListItem.Create(Id, productId, quantity, unit);
+        var item = ShoppingListItem.Create(Id, productId, quantity, unit, price);
         _items.Add(item);
         UpdatedAt = DateTime.UtcNow;
         return item;
@@ -127,13 +127,14 @@ public class ShoppingListItem
     public Guid ProductId { get; private set; }
     public decimal Quantity { get; private set; }
     public string? Unit { get; private set; }
+    public decimal? Price { get; private set; }
     public bool Checked { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     private ShoppingListItem() { }
 
-    internal static ShoppingListItem Create(Guid shoppingListId, Guid productId, decimal quantity, string? unit)
+    internal static ShoppingListItem Create(Guid shoppingListId, Guid productId, decimal quantity, string? unit, decimal? price = null)
     {
         var now = DateTime.UtcNow;
         return new ShoppingListItem
@@ -143,6 +144,7 @@ public class ShoppingListItem
             ProductId = productId,
             Quantity = quantity,
             Unit = unit?.Trim(),
+            Price = price,
             Checked = false,
             CreatedAt = now,
             UpdatedAt = now
@@ -161,12 +163,15 @@ public class ShoppingListItem
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateQuantity(decimal quantity)
+    public void UpdateDetails(decimal quantity, decimal? price)
     {
         if (quantity <= 0)
             throw new ArgumentException("A quantidade deve ser maior que zero.", nameof(quantity));
+        if (price < 0)
+            throw new ArgumentException("O preço não pode ser negativo.", nameof(price));
 
         Quantity = quantity;
+        Price = price;
         UpdatedAt = DateTime.UtcNow;
     }
 }
