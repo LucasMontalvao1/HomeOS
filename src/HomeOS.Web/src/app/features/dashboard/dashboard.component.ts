@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/auth.service';
 import { HouseholdService, Household } from '../../core/household.service';
 import { ShoppingListService } from '../../core/shopping-list.service';
@@ -76,6 +77,37 @@ import { ProductService } from '../../core/product.service';
             <p class="text-slate-500 mb-4">Convide membros, defina permissões e gerencie esta casa.</p>
             <div class="text-sm text-emerald-600 font-medium">Ver membros &rarr;</div>
           </div>
+
+          <!-- Telegram Connect Card -->
+          <div class="glass-card p-6 md:col-span-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                  <span>📱</span> Integração Telegram
+                </h2>
+                <p class="text-slate-500 text-sm">Gerencie suas listas de compras diretamente pelo Telegram.</p>
+              </div>
+              @if (!telegramCode) {
+                <button (click)="generateTelegramCode()" [disabled]="isGeneratingCode"
+                  class="btn-primary text-sm py-2 px-4 flex items-center gap-2 flex-shrink-0">
+                  {{ isGeneratingCode ? 'Gerando...' : 'Conectar Telegram' }}
+                </button>
+              }
+            </div>
+
+            @if (telegramCode) {
+              <div class="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <p class="text-sm text-slate-600 mb-2">Abra o Telegram e mande para o bot:</p>
+                <div class="flex items-center gap-3">
+                  <code class="text-lg font-bold text-emerald-700 bg-white px-4 py-2 rounded-lg border border-emerald-200 tracking-widest">/start {{ telegramCode }}</code>
+                  <button (click)="copyCode()" class="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                    {{ codeCopied ? '✅ Copiado!' : 'Copiar' }}
+                  </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">⚠️ Este código expira em 10 minutos.</p>
+              </div>
+            }
+          </div>
         </main>
       }
 
@@ -111,6 +143,7 @@ export class DashboardComponent {
   private householdService = inject(HouseholdService);
   private shoppingListService = inject(ShoppingListService);
   private productService = inject(ProductService);
+  private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
   router = inject(Router);
 
@@ -129,6 +162,10 @@ export class DashboardComponent {
 
   listsCount = 0;
   productsCount = 0;
+
+  telegramCode: string | null = null;
+  isGeneratingCode = false;
+  codeCopied = false;
 
   ngOnInit() {
     this.loadHouseholds();
@@ -201,6 +238,39 @@ export class DashboardComponent {
         this.loadHouseholds();
       },
       error: () => this.isJoining = false
+    });
+  }
+
+  generateTelegramCode() {
+    const householdId = this.activeHousehold?.id;
+    if (!householdId) {
+      alert('Selecione uma casa antes de conectar o Telegram.');
+      return;
+    }
+    this.isGeneratingCode = true;
+    this.http.post<{ code: string }>(`/api/telegram/generate-code?householdId=${householdId}`, {}).subscribe({
+      next: (res) => {
+        this.telegramCode = res.code;
+        this.isGeneratingCode = false;
+        this.cdr.markForCheck();
+        // Limpa o código após 10 minutos
+        setTimeout(() => {
+          this.telegramCode = null;
+          this.cdr.markForCheck();
+        }, 10 * 60 * 1000);
+      },
+      error: () => {
+        this.isGeneratingCode = false;
+        alert('Erro ao gerar código. Tente novamente.');
+      }
+    });
+  }
+
+  copyCode() {
+    if (!this.telegramCode) return;
+    navigator.clipboard.writeText(`/start ${this.telegramCode}`).then(() => {
+      this.codeCopied = true;
+      setTimeout(() => this.codeCopied = false, 3000);
     });
   }
 

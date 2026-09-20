@@ -12,6 +12,10 @@ using HomeOS.API.Modules.Products.Infrastructure;
 using HomeOS.API.Modules.Shopping.Application;
 using HomeOS.API.Modules.Shopping.Endpoints;
 using HomeOS.API.Modules.Shopping.Infrastructure;
+using HomeOS.API.Modules.Telegram.Application;
+using HomeOS.API.Modules.Telegram.Configuration;
+using HomeOS.API.Modules.Telegram.Endpoints;
+using HomeOS.API.Modules.Telegram.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -85,6 +89,11 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
 builder.Services.AddScoped<ShoppingListService>();
 
+// ─── Module Services (Telegram) ──────────────────────────────────────────────────
+builder.Services.Configure<TelegramSettings>(builder.Configuration.GetSection(TelegramSettings.Section));
+builder.Services.AddScoped<ITelegramLinkRepository, TelegramLinkRepository>();
+builder.Services.AddHttpClient<TelegramService>(); // gerencia HttpClient + ciclo de vida do TelegramService
+
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
@@ -108,6 +117,7 @@ app.MapIdentityEndpoints();
 app.MapHouseholdEndpoints();
 app.MapProductEndpoints();
 app.MapShoppingListEndpoints();
+app.MapTelegramEndpoints();
 
 app.MapGet("/", () => "HomeOS API is running.").AllowAnonymous();
 
